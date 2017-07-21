@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Drawing;
 using System.Linq;
 
 namespace ExportExcel.Mvc.Code
@@ -43,24 +44,32 @@ namespace ExportExcel.Mvc.Code
 
         public static byte[] ExportExcel(DataTable dataTable, string heading = "", bool showSrNo = false, params string[] columnsToTake)
         {
-
+            Image logo = Image.FromFile(@"C:\Users\eli.santos\Desktop\GitHub\ExportExcel\ExportExcel\ExportExcel.Mvc\img\idea.png");
+            
             byte[] result = null;
             using (ExcelPackage package = new ExcelPackage())
             {
-                ExcelWorksheet workSheet = package.Workbook.Worksheets.Add(String.Format("{0} Data", heading));
+                ExcelWorksheet workSheet = package.Workbook.Worksheets.Add(String.Format("{0}", heading));
+                
+                var picture = workSheet.Drawings.AddPicture("", logo);
+                picture.SetPosition(1,5,1,1);
+                
+                workSheet.View.ShowGridLines = false;
+                workSheet.View.FreezePanes(5,1);
+
                 int startRowFrom = String.IsNullOrEmpty(heading) ? 1 : 3;
 
-                if (showSrNo)
-                {
-                    DataColumn dataColumn = dataTable.Columns.Add("#", typeof(int));
-                    dataColumn.SetOrdinal(0);
-                    int index = 1;
-                    foreach (DataRow item in dataTable.Rows)
-                    {
-                        item[0] = index;
-                        index++;
-                    }
-                }
+                //if (showSrNo)
+                //{
+                //    DataColumn dataColumn = dataTable.Columns.Add("#", typeof(int));
+                //    dataColumn.SetOrdinal(0);
+                //    int index = 1;
+                //    foreach (DataRow item in dataTable.Rows)
+                //    {
+                //        item[0] = index;
+                //        index++;
+                //    }
+                //}
 
 
                 // add the content into the Excel file 
@@ -70,8 +79,8 @@ namespace ExportExcel.Mvc.Code
                 int columnIndex = 1;
                 foreach (DataColumn column in dataTable.Columns)
                 {
-                    ExcelRange columnCells = workSheet.Cells[workSheet.Dimension.Start.Row, columnIndex, workSheet.Dimension.End.Row, columnIndex];
-                    int maxLength = columnCells.Max(cell => cell.Value.ToString().Count());
+                    //ExcelRange columnCells = workSheet.Cells[workSheet.Dimension.Start.Row, columnIndex, workSheet.Dimension.End.Row, columnIndex];
+                    int maxLength = 100;
                     if (maxLength < 150)
                     {
                         workSheet.Column(columnIndex).AutoFit();
@@ -84,10 +93,12 @@ namespace ExportExcel.Mvc.Code
                 // format header - bold, yellow on black 
                 using (ExcelRange r = workSheet.Cells[startRowFrom, 1, startRowFrom, dataTable.Columns.Count])
                 {
-                    r.Style.Font.Color.SetColor(System.Drawing.Color.White);
+                    r.Style.Font.Color.SetColor(System.Drawing.Color.Black);
                     r.Style.Font.Bold = true;
                     r.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
-                    r.Style.Fill.BackgroundColor.SetColor(System.Drawing.ColorTranslator.FromHtml("#1fb5ad"));
+                    r.Style.Fill.BackgroundColor.SetColor(System.Drawing.ColorTranslator.FromHtml("#B0C4DE"));
+                    r.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                    r.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
                 }
 
                 // format cells - add borders 
@@ -102,6 +113,9 @@ namespace ExportExcel.Mvc.Code
                     r.Style.Border.Bottom.Color.SetColor(System.Drawing.Color.Black);
                     r.Style.Border.Left.Color.SetColor(System.Drawing.Color.Black);
                     r.Style.Border.Right.Color.SetColor(System.Drawing.Color.Black);
+                   
+                    r.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                    r.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
                 }
 
                 // removed ignored columns 
@@ -119,8 +133,8 @@ namespace ExportExcel.Mvc.Code
 
                 if (!String.IsNullOrEmpty(heading))
                 {
-                    workSheet.Cells["A1"].Value = heading;
-                    workSheet.Cells["A1"].Style.Font.Size = 20;
+                    workSheet.Cells["D1"].Value = heading;
+                    workSheet.Cells["D1"].Style.Font.Size = 20;
 
                     workSheet.InsertColumn(1, 1);
                     workSheet.InsertRow(1, 1);

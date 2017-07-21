@@ -27,7 +27,7 @@ namespace ExportExcel.Mvc.Controllers
         {
             List<Technology> technologies = StaticData.Technologies;
             string[] columns = { "Name", "Project", "Developer" };
-            byte[] filecontent = ExcelExportHelper.ExportExcel(technologies, "Technology", true, columns);
+            byte[] filecontent = ExcelExportHelper.ExportExcel(technologies, "Teste", true, columns);
             return File(filecontent, ExcelExportHelper.ExcelContentType, "Teste.xlsx");
         }
 
